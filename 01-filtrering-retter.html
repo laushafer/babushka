@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Filtrering af retterne</title>
+    <style>
+      body {
+        font-family: sans-serif;
+      }
+
+      img {
+        width: 100%;
+      }
+
+      #liste {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        grid-gap: 1em;
+        margin: 2em;
+      }
+
+      .person {
+        padding: 1em;
+        border: 1px solid;
+        border-radius: 1em;
+      }
+    </style>
+  </head>
+
+  <body>
+    <header>
+      <h1></h1>
+    </header>
+
+    <section id="liste"></section>
+
+    <template>
+      <article class="person">
+        <h2 class="navn"></h2>
+        <p class="beskrivelse"></p>
+        <img src="" alt="" class="menu-billede" />
+      </article>
+    </template>
+
+    <script>
+      const header = document.querySelector("header h1");
+      const myHeaders = {
+        "x-apikey": "600ec2fb1346a1524ff12de4",
+      };
+      document.addEventListener("DOMContentLoaded", start);
+      let menu;
+      let dessert = "desserter";
+      let hovedret = "hovedretter";
+      let forret = "forretter";
+      let drikke = "drikkevarer";
+      let sideo = "sideorders";
+
+      // første funktion der kaldes efter DOM er loaded
+      function start() {
+        loadJSON();
+      }
+
+      async function loadJSON() {
+        const JSONData = await fetch(
+          "https://babushka-dd8a.restdb.io/rest/menu",
+          {
+            headers: myHeaders,
+          }
+        );
+        menu = await JSONData.json();
+        console.log("Menu", menu);
+        visMenu();
+      }
+
+      //funktion der viser personer i liste view
+      function visMenu() {
+        const dest = document.querySelector("#liste"); // container til articles med en person
+        const skabelon = document.querySelector("template").content; // select indhold af html skabelon (article)
+
+        menu.forEach((menu) => {
+          // loop igennem json (personer)
+          if (dessert == menu.kategori) {
+            const klon = skabelon.cloneNode(true);
+            klon.querySelector(".navn").textContent = menu.navn;
+            klon.querySelector(".beskrivelse").textContent =
+              menu.kortbeskrivelse;
+            klon.querySelector(".menu-billede").src =
+              "images/" + menu.billednavn + "-md.jpg";
+            dest.appendChild(klon);
+          } else if (hovedret == menu.kategori) {
+            const klon = skabelon.cloneNode(true);
+            klon.querySelector(".navn").textContent = menu.navn;
+            klon.querySelector(".beskrivelse").textContent =
+              menu.kortbeskrivelse;
+            klon.querySelector(".menu-billede").src =
+              "images/" + menu.billednavn + "-md.jpg";
+            dest.appendChild(klon);
+          } else if (forret == menu.kategori) {
+            const klon = skabelon.cloneNode(true);
+            klon.querySelector(".navn").textContent = menu.navn;
+            klon.querySelector(".beskrivelse").textContent =
+              menu.kortbeskrivelse;
+            klon.querySelector(".menu-billede").src =
+              "images/" + menu.billednavn + "-md.jpg";
+            dest.appendChild(klon);
+          } else if (drikke == menu.kategori) {
+            const klon = skabelon.cloneNode(true);
+            klon.querySelector(".navn").textContent = menu.navn;
+            klon.querySelector(".beskrivelse").textContent =
+              menu.kortbeskrivelse;
+            klon.querySelector(".menu-billede").src =
+              "images/" + menu.billednavn + "-md.jpg";
+            dest.appendChild(klon);
+          } else if (sideo == menu.kategori) {
+            const klon = skabelon.cloneNode(true);
+            klon.querySelector(".navn").textContent = menu.navn;
+            klon.querySelector(".beskrivelse").textContent =
+              menu.kortbeskrivelse;
+            klon.querySelector(".menu-billede").src =
+              "images/" + menu.billednavn + "-md.jpg";
+            dest.appendChild(klon);
+          }
+        });
+      }
+    </script>
+  </body>
+</html>

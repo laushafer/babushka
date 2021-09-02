@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Filtrering af retterne</title>
+    <style>
+      body {
+        font-family: sans-serif;
+      }
+
+      img {
+        width: 100%;
+      }
+
+      #liste {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        grid-gap: 1em;
+        margin: 2em;
+      }
+
+      .person {
+        padding: 1em;
+        border: 1px solid;
+        border-radius: 1em;
+      }
+
+      nav {
+        display: flex;
+        justify-content: center;
+        gap: 1rem;
+        padding: 1rem;
+        background-color: chocolate;
+      }
+
+      button {
+        font-size: 1.5rem;
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      }
+
+      .valgt {
+        opacity: 75%;
+        color: goldenrod;
+      }
+    </style>
+  </head>
+
+  <body>
+    <header>
+      <h1>Alle</h1>
+      <nav>
+        <button data-kategori="alle" class="valgt">Alle</button>
+        <button data-kategori="forretter">Forretter</button>
+        <button data-kategori="hovedretter">Hovedretter</button>
+        <button data-kategori="desserter">Desserter</button>
+        <button data-kategori="sideorders">Sideorders</button>
+        <button data-kategori="drikkevarer">Drikkevarer</button>
+      </nav>
+    </header>
+
+    <section id="liste"></section>
+
+    <template>
+      <article class="person">
+        <h2 class="navn"></h2>
+        <p class="beskrivelse"></p>
+        <img src="" alt="" class="menu-billede" />
+      </article>
+    </template>
+
+    <script>
+      const header = document.querySelector("header h1");
+      const myHeaders = {
+        "x-apikey": "600ec2fb1346a1524ff12de4",
+      };
+
+      document.addEventListener("DOMContentLoaded", start);
+      let menu;
+      let filter = "alle";
+
+      // første funktion der kaldes efter DOM er loaded
+      function start() {
+        const filterKnapper = document.querySelectorAll("nav button");
+        filterKnapper.forEach((knap) =>
+          knap.addEventListener("click", filterKategori)
+        );
+        loadJSON();
+      }
+
+      function filterKategori() {
+        filter = this.dataset.kategori;
+        document.querySelector(".valgt").classList.remove("valgt");
+        this.classList.add("valgt");
+
+        visMenu();
+
+        header.textContent = this.textContent;
+      }
+
+      async function loadJSON() {
+        const JSONData = await fetch(
+          "https://babushka-dd8a.restdb.io/rest/menu",
+          {
+            headers: myHeaders,
+          }
+        );
+        menu = await JSONData.json();
+        console.log("Menu", menu);
+        visMenu();
+      }
+
+      //funktion der viser personer i liste view
+      function visMenu() {
+        const dest = document.querySelector("#liste"); // container til articles med en person
+        const skabelon = document.querySelector("template").content; // select indhold af html skabelon (article)
+        dest.textContent = "";
+
+        menu.forEach((retter) => {
+          // loop igennem json (personer)
+          if (filter == retter.kategori || filter == "alle") {
+            const klon = skabelon.cloneNode(true);
+            klon.querySelector(".navn").textContent = retter.navn;
+            klon.querySelector(".beskrivelse").textContent =
+              retter.kortbeskrivelse;
+            klon.querySelector(".menu-billede").src =
+              "images/" + retter.billednavn + "-md.jpg";
+            dest.appendChild(klon);
+          }
+        });
+      }
+    </script>
+  </body>
+</html>

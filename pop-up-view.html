@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Bistro Babushka pop up</title>
+    <style>
+      body {
+        font-family: sans-serif;
+        background-color: #d0e5f3;
+      }
+
+      img {
+        max-width: 100%;
+        border-radius: 1em;
+      }
+
+      #liste {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+        grid-gap: 1em;
+        margin: 2em;
+      }
+
+      article {
+        padding: 1em;
+        border: 1px solid;
+        border-radius: 1em;
+        background-color: #ffdcab;
+      }
+
+      header {
+        background-color: #3c7aa3;
+        padding: 4rem;
+      }
+
+      header h1 {
+        font-family: Georgia, "Times New Roman", Times, serif;
+        color: white;
+        text-align: center;
+      }
+
+      h2 {
+        text-align: center;
+      }
+
+      h4 {
+        font-size: 2rem;
+        text-align: end;
+      }
+
+      h1 {
+        font-size: 3rem;
+        letter-spacing: 0.2rem;
+      }
+
+      nav {
+        display: flex;
+        justify-content: center;
+        gap: 1rem;
+        padding: 1rem;
+        flex-wrap: wrap;
+      }
+
+      button {
+        font-size: 1.5rem;
+        font-family: Verdana, Geneva, Tahoma, sans-serif;
+        background-color: #a3804d;
+        border-radius: 0.5em;
+        color: white;
+      }
+
+      .valgt {
+        opacity: 60%;
+      }
+
+      /* popup styling */
+
+      #popup {
+        width: 50vw;
+        position: fixed;
+        top: 5vw;
+        left: 25.5vw;
+        display: none;
+      }
+
+      #popup article {
+        background-color: #d0e5f3;
+      }
+
+      #popup article .navnp {
+        display: block;
+      }
+
+      #popup article .billedep {
+        max-width: 80%;
+      }
+    </style>
+  </head>
+
+  <body>
+    <header>
+      <h1>BISTRO BABUSHKA</h1>
+    </header>
+    <nav>
+      <button data-kategori="alle" class="valgt">ALLE</button>
+      <button data-kategori="forretter">FORRETTER</button>
+      <button data-kategori="hovedretter">HOVEDRETTER</button>
+      <button data-kategori="desserter">DESSERTER</button>
+      <button data-kategori="sideorders">SIDEORDERS</button>
+      <button data-kategori="drikkevarer">DRIKKEVARER</button>
+    </nav>
+    <h2 style="text-transform: uppercase">Alle</h2>
+    <section id="liste"></section>
+
+    <template>
+      <article>
+        <h2 class="navn" style="text-transform: uppercase"></h2>
+        <p class="beskrivelse"></p>
+        <img src="" alt="" class="menu-billede" />
+        <h4 class="pris"></h4>
+      </article>
+    </template>
+
+    <section id="popup">
+      <article>
+        <button>X</button>
+        <h2 class="navnp"></h2>
+        <img src="" alt="" class="billedep" />
+
+        <p class="langbp"></p>
+        <p class="oprindelsep"></p>
+        <p class="prisp"></p>
+      </article>
+    </section>
+
+    <script>
+      const header = document.querySelector("h2");
+      const myHeaders = {
+        "x-apikey": "600ec2fb1346a1524ff12de4",
+      };
+
+      document.addEventListener("DOMContentLoaded", start);
+      let retter;
+      let filter = "alle";
+
+      // første funktion der kaldes efter DOM er loaded
+      function start() {
+        const filterKnapper = document.querySelectorAll("nav button");
+        filterKnapper.forEach((knap) =>
+          knap.addEventListener("click", filterKategori)
+        );
+        loadJSON();
+      }
+
+      function filterKategori() {
+        filter = this.dataset.kategori;
+        document.querySelector(".valgt").classList.remove("valgt");
+        this.classList.add("valgt");
+
+        visMenu();
+
+        header.textContent = this.textContent;
+      }
+
+      async function loadJSON() {
+        const JSONData = await fetch(
+          "https://babushka-dd8a.restdb.io/rest/menu",
+          {
+            headers: myHeaders,
+          }
+        );
+        retter = await JSONData.json();
+        console.log("Menu", retter);
+        visMenu();
+      }
+
+      //funktion der viser personer i liste view
+      function visMenu() {
+        const dest = document.querySelector("#liste"); // container til articles med en person
+        const skabelon = document.querySelector("template").content; // select indhold af html skabelon (article)
+        dest.textContent = "";
+
+        retter.forEach((retter) => {
+          // loop igennem json (personer)
+          if (filter == retter.kategori || filter == "alle") {
+            const klon = skabelon.cloneNode(true);
+            klon.querySelector(".navn").textContent = retter.navn;
+            klon.querySelector(".beskrivelse").textContent =
+              retter.kortbeskrivelse;
+            klon.querySelector(".pris").textContent = retter.pris + ".-";
+            klon.querySelector(".menu-billede").src =
+              "images/" + retter.billednavn + "-md.jpg";
+
+            //Kalder anonym funktion indeni click, der fører siden over til single view
+            klon
+              .querySelector("article")
+              .addEventListener("click", () => visDetaljer(retter));
+            dest.appendChild(klon);
+          }
+        });
+      }
+
+      function visDetaljer(retter) {
+        console.log(retter);
+        const popup = document.querySelector("#popup");
+        popup.style.display = "block";
+        popup.querySelector(".navnp").textContent = retter.navn;
+        popup.querySelector(".langbp").textContent = retter.langbeskrivelse;
+        popup.querySelector(".oprindelsep").textContent = retter.oprindelse;
+        popup.querySelector(".prisp").textContent =
+          "pris: " + retter.pris + " DKK";
+        popup.querySelector(".billedep").src =
+          "images/" + retter.billednavn + "-md.jpg";
+
+        document
+          .querySelector("#popup button")
+          .addEventListener("click", lukPopup);
+      }
+
+      function lukPopup() {
+        popup.style.display = "none";
+      }
+    </script>
+  </body>
+</html>
